@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapping the Seafloor: Sonar Systems</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+    background:#eef8ff;
+    line-height:1.6;
+}
+
+h1,h2{
+    color:#004d73;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    margin:20px 0;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+
+button{
+    background:#0078d7;
+    color:white;
+    border:none;
+    padding:10px 15px;
+    border-radius:6px;
+    cursor:pointer;
+    margin:5px;
+}
+
+button:hover{
+    background:#005fa3;
+}
+
+.hidden{
+    display:none;
+}
+
+#progressContainer{
+    width:100%;
+    background:#ccc;
+    border-radius:20px;
+    overflow:hidden;
+    margin-bottom:25px;
+}
+
+#progressBar{
+    height:25px;
+    width:0%;
+    background:#28a745;
+    text-align:center;
+    color:white;
+    line-height:25px;
+    font-weight:bold;
+}
+
+#ocean{
+    height:300px;
+    background:linear-gradient(#4da6ff,#003d66);
+    position:relative;
+    overflow:hidden;
+    border-radius:10px;
+}
+
+#ship{
+    position:absolute;
+    top:10px;
+    left:45%;
+    font-size:40px;
+}
+
+#floor{
+    position:absolute;
+    bottom:0;
+    width:100%;
+    height:60px;
+    background:#5a3e1b;
+}
+
+.ping{
+    position:absolute;
+    top:55px;
+    left:50%;
+    border:2px solid yellow;
+    border-radius:50%;
+    transform:translateX(-50%);
+    animation:pingAnim 3s ease-out forwards;
+}
+
+@keyframes pingAnim{
+    from{
+        width:10px;
+        height:10px;
+        opacity:1;
+    }
+    to{
+        width:300px;
+        height:300px;
+        opacity:0;
+    }
+}
+
+.visual{
+    font-size:40px;
+    text-align:center;
+    margin-top:20px;
+    min-height:150px;
+}
+
+.quizQuestion{
+    margin-bottom:20px;
+}
+
+.correct{
+    color:green;
+    font-weight:bold;
+}
+
+.incorrect{
+    color:red;
+    font-weight:bold;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+td,th{
+    border:1px solid #ddd;
+    padding:10px;
+}
+
+.challengeBtn{
+    margin:8px;
+}
+
+.resultBox{
+    margin-top:10px;
+    font-weight:bold;
+}
+
+input{
+    padding:8px;
+    font-size:16px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🌊 Mapping the Seafloor: Sonar Systems</h1>
+
+<div id="progressContainer">
+<div id="progressBar">0%</div>
+</div>
+
+<div class="card">
+<h2>Why Do Scientists Use Sonar?</h2>
+
+<p>The deep ocean is dark and impossible to observe directly across large areas.</p>
+
+<button onclick="toggleSection('why')">
+Reveal More
+</button>
+
+<div id="why" class="hidden">
+Scientists use sound waves to map underwater mountains, trenches, canyons, ridges, and volcanoes. This process is called <strong>bathymetry</strong>, or mapping the shape of the seafloor.
+</div>
+</div>
+
+<div class="card">
+<h2>🔊 Sonar Ping Simulation</h2>
+
+<p>Click the button to transmit a sonar pulse.</p>
+
+<button onclick="sendPing();completeStep(1);">
+Send Sonar Ping
+</button>
+
+<div id="ocean">
+<div id="ship">🚢</div>
+<div id="floor"></div>
+</div>
+
+<p id="pingText"></p>
+</div>
+
+<div class="card">
+<h2>📏 Sonar Depth Calculator</h2>
+
+<p>
+Sound travels through seawater at approximately
+<strong>1500 m/s</strong>.
+</p>
+
+<p>
+Depth = (Speed × Time) ÷ 2
+</p>
+
+<label>Echo Return Time (seconds):</label>
+<br>
+<input id="timeInput" type="number" step="0.1">
+
+<button onclick="calculateDepth();completeStep(2);">
+Calculate Depth
+</button>
+
+<p id="depthResult"></p>
+</div>
+
+<div class="card">
+<h2>📡 Single Beam vs Multibeam Sonar</h2>
+
+<button onclick="showBeam('single');completeStep(3);">
+Single Beam
+</button>
+
+<button onclick="showBeam('multi');completeStep(3);">
+Multibeam
+</button>
+
+<div class="visual" id="beamDisplay"></div>
+
+<p id="beamExplanation"></p>
+</div>
+
+<div class="card">
+<h2>🪨 Echo Strength Activity</h2>
+
+<p>Which material creates the strongest sonar echo?</p>
+
+<button onclick="echoAnswer('rock')">Rock</button>
+<button onclick="echoAnswer('metal')">Metal</button>
+<button onclick="echoAnswer('mud')">Mud</button>
+<button onclick="echoAnswer('plants')">Plants</button>
+
+<p id="echoFeedback"></p>
+</div>
+
+<div class="card">
+<h2>🚢 vs 🤖 Mission Planner</h2>
+
+<p>
+You have been hired by NOAA.
+Choose the best tool for each mission.
+</p>
+
+<h3>Mission 1</h3>
+<p>Map 10,000 square kilometers of deep ocean.</p>
+<button class="challengeBtn"
+onclick="mission(this,'ship','mission1')">
+Ship
+</button>
+
+<button class="challengeBtn"
+onclick="mission(this,'auv','mission1')">
+AUV
+</button>
+
+<div id="mission1"></div>
+
+<hr>
+
+<h3>Mission 2</h3>
+<p>Explore a narrow underwater canyon.</p>
+
+<button class="challengeBtn"
+onclick="mission(this,'ship','mission2')">
+Ship
+</button>
+
+<button class="challengeBtn"
+onclick="mission(this,'auv','mission2')">
+AUV
+</button>
+
+<div id="mission2"></div>
+
+<hr>
+
+<h3>Mission 3</h3>
+<p>Collect extremely detailed seafloor imagery.</p>
+
+<button class="challengeBtn"
+onclick="mission(this,'ship','mission3')">
+Ship
+</button>
+
+<button class="challengeBtn"
+onclick="mission(this,'auv','mission3')">
+AUV
+</button>
+
+<div id="mission3"></div>
+
+</div>
+
+<div class="card">
+<h2>✅ Knowledge Check</h2>
+
+<div class="quizQuestion">
+<p>1. What does SONAR stand for?</p>
+
+<select id="q1">
+<option></option>
+<option>Sound Navigation and Radar</option>
+<option>Sound Navigation and Ranging</option>
+<option>System Navigation and Reading</option>
+</select>
+</div>
+
+<div class="quizQuestion">
+<p>2. Approximately how fast does sound travel in seawater?</p>
+
+<select id="q2">
+<option></option>
+<option>340 m/s</option>
+<option>1500 m/s</option>
+<option>5000 m/s</option>
+</select>
+</div>
+
+<div class="quizQuestion">
+<p>3. Which sonar provides many depth measurements at once?</p>
+
+<select id="q3">
+<option></option>
+<option>Single Beam</option>
+<option>Multibeam</option>
+</select>
+</div>
+
+<div class="quizQuestion">
+<p>4. What is bathymetry?</p>
+
+<select id="q4">
+<option></option>
+<option>Ocean Weather</option>
+<option>Underwater Topography</option>
+<option>Marine Biology</option>
+</select>
+</div>
+
+<button onclick="gradeQuiz();completeStep(4);">
+Submit Quiz
+</button>
+
+<div id="quizResult"></div>
+
+</div>
+
+<div class="card">
+<h2>🎓 Mission Complete</h2>
+
+<p>
+You have explored how scientists use sonar to map the ocean floor.
+</p>
+
+<ul>
+<li>Sound travels about 1500 m/s through seawater.</li>
+<li>Sonar measures depth using echo return time.</li>
+<li>Multibeam sonar creates detailed maps.</li>
+<li>Ships cover large areas quickly.</li>
+<li>AUVs produce higher-resolution maps.</li>
+</ul>
+</div>
+
+<script>
+
+let progress = 0;
+
+function completeStep(points){
+    progress += points;
+
+    if(progress > 100){
+        progress = 100;
+    }
+
+    document.getElementById('progressBar').style.width =
+        progress + "%";
+
+    document.getElementById('progressBar').innerHTML =
+        progress + "%";
+}
+
+function toggleSection(id){
+    document.getElementById(id).classList.toggle('hidden');
+}
+
+function sendPing(){
+
+    let ping =
+        document.createElement('div');
+
+    ping.className = 'ping';
+
+    document.getElementById('ocean').appendChild(ping);
+
+    document.getElementById('pingText').innerHTML =
+    "The transmitter sent a sound pulse. The echo returns after bouncing off the seafloor.";
+
+    setTimeout(()=>{
+        ping.remove();
+    },3000);
+}
+
+function calculateDepth(){
+
+    let t =
+        parseFloat(document.getElementById("timeInput").value);
+
+    if(isNaN(t) || t <= 0){
+        document.getElementById("depthResult").innerHTML =
+        "Please enter a positive return time.";
+        return;
+    }
+
+    let depth =
+        (1500 * t)/2;
+
+    document.getElementById("depthResult").innerHTML =
+        "Estimated depth: <strong>" +
+        depth.toFixed(1) +
+        " meters</strong>";
+}
+
+function showBeam(type){
+
+    let display =
+        document.getElementById("beamDisplay");
+
+    let expl =
+        document.getElementById("beamExplanation");
+
+    if(type === "single"){
+
+        display.innerHTML =
+        `
+        <pre>
+          🚢
+           |
+           |
+           |
+           |
+        </pre>
+        `;
+
+        expl.innerHTML =
+        "Single Beam Sonar measures one point below the vessel.";
+    }
+    else{
+
+        display.innerHTML =
+        `
+        <pre>
+            🚢
+          \\ | /
+           \\|/
+           /|\\
+          / | \\
+        </pre>
+        `;
+
+        expl.innerHTML =
+        "Multibeam Sonar collects many measurements at once and maps large areas of seafloor.";
+    }
+}
+
+function echoAnswer(material){
+
+    const box =
+        document.getElementById('echoFeedback');
+
+    if(material === "metal"){
+
+        box.innerHTML =
+        "<span class='correct'>Correct! Dense materials like metal create very strong echoes.</span>";
+
+        completeStep(5);
+    }
+    else{
+
+        box.innerHTML =
+        "<span class='incorrect'>Not quite. Dense materials reflect sound most strongly.</span>";
+    }
+}
+
+function mission(button,choice,target){
+
+    let box =
+        document.getElementById(target);
+
+    if(target==="mission1"){
+
+        if(choice==="ship"){
+            box.innerHTML =
+            "✅ Correct! Ships cover huge areas efficiently.";
+        }else{
+            box.innerHTML =
+            "❌ AUVs are detailed but much slower.";
+        }
+    }
+
+    if(target==="mission2"){
+
+        if(choice==="auv"){
+            box.innerHTML =
+            "✅ Correct! AUVs maneuver through tight spaces.";
+        }else{
+            box.innerHTML =
+            "❌ Ships struggle in confined areas.";
+        }
+    }
+
+    if(target==="mission3"){
+
+        if(choice==="auv"){
+            box.innerHTML =
+            "✅ Correct! AUV sonar produces extremely high-resolution images.";
+        }else{
+            box.innerHTML =
+            "❌ Ship systems prioritize coverage over detail.";
+        }
+    }
+}
+
+function gradeQuiz(){
+
+    let score = 0;
+
+    if(document.getElementById('q1').value ===
+       'Sound Navigation and Ranging')
+       score++;
+
+    if(document.getElementById('q2').value ===
+       '1500 m/s')
+       score++;
+
+    if(document.getElementById('q3').value ===
+       'Multibeam')
+       score++;
+
+    if(document.getElementById('q4').value ===
+       'Underwater Topography')
+       score++;
+
+    let percent =
+        Math.round((score/4)*100);
+
+    document.getElementById('quizResult').innerHTML =
+        "<h3>Score: " +
+        score +
+        "/4 (" +
+        percent +
+        "%)</h3>";
+
+    progress = Math.max(progress, 100);
+
+    document.getElementById('progressBar').style.width="100%";
+    document.getElementById('progressBar').innerHTML="100%";
+}
+
+</script>
+
+</body>
+</html>
