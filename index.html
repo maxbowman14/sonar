@@ -429,9 +429,11 @@ function toggleSection(id){
 
 function sendPing(){
 
-    let ping =
-        document.createElement('div');
-		
+    let down = document.getElementById("waveDown");
+    let up = document.getElementById("waveUp");
+    let status = document.getElementById("sonarStatus");
+	
+	
     const ring =
     document.getElementById("sonarRing");
 
@@ -441,17 +443,35 @@ function sendPing(){
     ring.style.opacity = 1;
     ring.style.animation =
     "pingDown 2s linear";
-	
-    ping.className = 'ping';
 
-    document.getElementById('ocean').appendChild(ping);
+    down.style.animation = "none";
+    up.style.animation = "none";
 
-    document.getElementById('pingText').innerHTML =
-    "The transmitter sent a sound pulse. The echo returns after bouncing off the seafloor.";
+    down.style.opacity = 0;
+    up.style.opacity = 0;
 
-    setTimeout(()=>{
-        ping.remove();
-    },3000);
+    void down.offsetWidth;
+
+    status.innerHTML = "📡 Sending Ping...";
+
+    down.style.opacity = 1;
+    down.style.animation = "travelDown 1.5s linear forwards";
+
+    setTimeout(() => {
+
+        status.innerHTML = "🔊 Echo Detected!";
+
+        up.style.opacity = 1;
+        up.style.animation = "travelUp 1.5s linear forwards";
+
+    }, 1500);
+
+    setTimeout(() => {
+
+        status.innerHTML =
+        "✅ Return Signal Received";
+
+    }, 3000);
 }
 
 function calculateDepth(){
