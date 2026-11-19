@@ -64,38 +64,80 @@ button:hover{
 }
 
 #ocean{
+    width:100%;
     height:300px;
-    background:linear-gradient(#4da6ff,#003d66);
+    background:linear-gradient(#4dafff,#003d66);
+    border-radius:12px;
     position:relative;
     overflow:hidden;
-    border-radius:10px;
 }
 
 #ship{
     position:absolute;
     top:10px;
-    left:45%;
-    font-size:40px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:42px;
 }
 
-#floor{
+#seafloor{
     position:absolute;
     bottom:0;
     width:100%;
-    height:60px;
-    background:#5a3e1b;
+    height:50px;
+    background:#654321;
 }
 
-#sonarRing{
-    width:20px;
-    height:20px;
-    border:4px solid yellow;
-    border-radius:50%;
+#outgoingPulse,
+#returnPulse{
     position:absolute;
+    width:16px;
+    height:16px;
     left:50%;
-    top:55px;
     transform:translateX(-50%);
+    border-radius:50%;
     opacity:0;
+}
+
+#outgoingPulse{
+    background:yellow;
+    box-shadow:0 0 15px yellow;
+}
+
+#returnPulse{
+    background:lime;
+    box-shadow:0 0 15px lime;
+}
+
+#flash{
+    position:absolute;
+    width:100%;
+    height:50px;
+    bottom:0;
+    background:white;
+    opacity:0;
+}
+
+#sonarStatus{
+    position:absolute;
+    top:15px;
+    left:15px;
+    color:white;
+    background:rgba(0,0,0,.4);
+    padding:6px 12px;
+    border-radius:6px;
+    font-weight:bold;
+}
+
+#timerDisplay{
+    position:absolute;
+    top:50px;
+    left:15px;
+    color:white;
+    background:rgba(0,0,0,.4);
+    padding:6px 12px;
+    border-radius:6px;
+    font-weight:bold;
 }
 
 .ping{
@@ -217,9 +259,19 @@ Send Sonar Ping
 </button>
 
 <div id="ocean">
-<div id="ship">🚢</div>
-<div id="floor"></div>
-<div id="sonarRing"></div>
+
+    <div id="ship">🚢</div>
+
+    <div id="outgoingPulse"></div>
+    <div id="returnPulse"></div>
+
+    <div id="flash"></div>
+
+    <div id="sonarStatus">Ready to Send Ping</div>
+    <div id="timerDisplay">Time: 0.0 s</div>
+
+    <div id="seafloor"></div>
+
 </div>
 
 <p id="pingText"></p>
@@ -429,49 +481,116 @@ function toggleSection(id){
 
 function sendPing(){
 
-    let down = document.getElementById("waveDown");
-    let up = document.getElementById("waveUp");
-    let status = document.getElementById("sonarStatus");
-	
-	
-    const ring =
-    document.getElementById("sonarRing");
+    const outgoing =
+        document.getElementById("outgoingPulse");
 
-    ring.style.animation = "none";
-    void ring.offsetWidth;
+    const incoming =
+        document.getElementById("returnPulse");
 
-    ring.style.opacity = 1;
-    ring.style.animation =
-    "pingDown 2s linear";
+    const flash =
+        document.getElementById("flash");
 
-    down.style.animation = "none";
-    up.style.animation = "none";
+    const status =
+        document.getElementById("sonarStatus");
 
-    down.style.opacity = 0;
-    up.style.opacity = 0;
+    const timer =
+        document.getElementById("timerDisplay");
 
-    void down.offsetWidth;
+    // reset
+    outgoing.style.opacity = 0;
+    incoming.style.opacity = 0;
+    flash.style.opacity = 0;
 
     status.innerHTML = "📡 Sending Ping...";
+    timer.innerHTML = "Time: 0.0 s";
 
-    down.style.opacity = 1;
-    down.style.animation = "travelDown 1.5s linear forwards";
+    let startTime = Date.now();
 
-    setTimeout(() => {
+    let timerInterval = setInterval(() => {
 
-        status.innerHTML = "🔊 Echo Detected!";
+        let elapsed =
+            (Date.now() - startTime)/1000;
 
-        up.style.opacity = 1;
-        up.style.animation = "travelUp 1.5s linear forwards";
+        timer.innerHTML =
+            "Time: " + elapsed.toFixed(1) + " s";
 
-    }, 1500);
+    },100);
 
-    setTimeout(() => {
+    //---------------------------------
+    // OUTGOING PULSE
+    //---------------------------------
 
-        status.innerHTML =
-        "✅ Return Signal Received";
+    outgoing.style.opacity = 1;
 
-    }, 3000);
+    let y = 50;
+
+    const downTrip = setInterval(() => {
+
+        y += 4;
+
+        outgoing.style.top = y + "px";
+
+        if(y >= 235){
+
+            clearInterval(downTrip);
+
+            outgoing.style.opacity = 0;
+
+            //---------------------------------
+            // SEAFLOOR HIT
+            //---------------------------------
+
+            flash.style.opacity = 0.7;
+
+            setTimeout(() => {
+
+                flash.style.opacity = 0;
+
+            },150);
+
+            status.innerHTML =
+                "🔊 Echo Reflected";
+
+            //---------------------------------
+            // RETURN PULSE
+            //---------------------------------
+
+            incoming.style.opacity = 1;
+
+            let returnY = 235;
+
+            const upTrip =
+                setInterval(() => {
+
+                returnY -= 4;
+
+                incoming.style.top =
+                    returnY + "px";
+
+                if(returnY <= 50){
+
+                    clearInterval(upTrip);
+
+                    incoming.style.opacity = 0;
+
+                    clearInterval(timerInterval);
+
+                    let totalTime =
+                        (Date.now()-startTime)/1000;
+
+                    status.innerHTML =
+                        "✅ Echo Received";
+
+                    timer.innerHTML =
+                        "Round Trip Time: "
+                        + totalTime.toFixed(2)
+                        + " s";
+                }
+
+            },15);
+        }
+
+    },15);
 }
 
 function calculateDepth(){
