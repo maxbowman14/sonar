@@ -275,8 +275,15 @@ Send Sonar Ping
     <div id="sonarStatus">Ready to Send Ping</div>
     <div id="timerDisplay">Time: 0.0 s</div>
 
-    <div id="seafloor"></div>
-
+	<canvas id="seafloorCanvas"
+			width="1000"
+			height="80"
+			style="
+				position:absolute;
+				bottom:0;
+				width:100%;
+				height:80px;">
+	</canvas>
 </div>
 
 <p id="pingText"></p>
@@ -471,11 +478,50 @@ let shipX = 50; // percentage across the ocean
 const ship =
     document.getElementById("ship");
 
+// Depth profile across the ocean
+const depthMap = [
+    120, 180, 220, 160, 90,
+    250, 300, 140, 80, 200
+];
+
 function updateShipPosition(){
     ship.style.left = shipX + "%";
 }
 
 updateShipPosition();
+function drawSeafloor() {
+
+    const canvas =
+        document.getElementById("seafloorCanvas");
+
+    const ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    ctx.beginPath();
+    ctx.moveTo(0,80);
+
+    const sectionWidth =
+        canvas.width / (depthMap.length - 1);
+
+    for(let i=0;i<depthMap.length;i++){
+
+        const x = i * sectionWidth;
+
+        const y =
+            80 - (depthMap[i] / 300) * 60;
+
+        ctx.lineTo(x,y);
+    }
+
+    ctx.lineTo(canvas.width,80);
+    ctx.closePath();
+
+    ctx.fillStyle = "#654321";
+    ctx.fill();
+}
+
+drawSeafloor();
 
 function completeStep(points){
     progress += points;
@@ -556,8 +602,12 @@ function sendPing(){
 
         outgoing.style.top = y + "px";
 
-        if(y >= 235){
+	const currentDepth = getCurrentDepth();
 
+	const targetY =
+		70 + (currentDepth / 300) * 170;
+
+	if(y >= targetY)
             clearInterval(downTrip);
 
             outgoing.style.opacity = 0;
@@ -583,8 +633,7 @@ function sendPing(){
 
             incoming.style.opacity = 1;
 
-            let returnY = 235;
-
+			let returnY = targetY;
             const upTrip =
                 setInterval(() => {
 
@@ -790,6 +839,18 @@ document.addEventListener("keydown", (e) => {
 
     updateShipPosition();
 });
+
+function getCurrentDepth() {
+
+    const section =
+        Math.floor((shipX / 100) * depthMap.length);
+
+    return depthMap[
+        Math.min(section, depthMap.length - 1)
+    ];
+}
+
+
 
 </script>
 
