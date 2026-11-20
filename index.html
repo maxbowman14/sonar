@@ -76,8 +76,8 @@ button:hover{
     position:absolute;
     top:10px;
     left:50%;
-    transform:translateX(-50%);
     font-size:42px;
+    user-select:none;
 }
 
 #seafloor{
@@ -464,6 +464,17 @@ You have explored how scientists use sonar to map the ocean floor.
 
 let progress = 0;
 
+let shipX = 50; // percentage across the ocean
+
+const ship =
+    document.getElementById("ship");
+
+function updateShipPosition(){
+    ship.style.left = shipX + "%";
+}
+
+updateShipPosition();
+
 function completeStep(points){
     progress += points;
 
@@ -498,6 +509,16 @@ function sendPing(){
 
     const timer =
         document.getElementById("timerDisplay");
+	const ship =
+		document.getElementById("ship");
+
+	const ocean =
+		document.getElementById("ocean");
+
+	const shipCenter =
+		ship.offsetLeft + (ship.offsetWidth / 2);
+	outgoing.style.left = shipCenter + "px";
+	incoming.style.left = shipCenter + "px";
 
     // reset
     outgoing.style.opacity = 0;
@@ -751,6 +772,22 @@ function gradeQuiz(){
     document.getElementById('progressBar').style.width="100%";
     document.getElementById('progressBar').innerHTML="100%";
 }
+
+document.addEventListener("keydown", (e) => {
+
+    if(e.key === "ArrowLeft"){
+        shipX -= 2;
+    }
+
+    if(e.key === "ArrowRight"){
+        shipX += 2;
+    }
+
+    // keep boat on screen
+    shipX = Math.max(2, Math.min(98, shipX));
+
+    updateShipPosition();
+});
 
 </script>
 
