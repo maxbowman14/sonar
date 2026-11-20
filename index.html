@@ -485,7 +485,15 @@ const depthMap = [
 ];
 
 function updateShipPosition(){
+
     ship.style.left = shipX + "%";
+
+    document.getElementById(
+        "depthReadout"
+    ).innerHTML =
+        "Estimated Depth: " +
+        getCurrentDepth() +
+        " m";
 }
 
 updateShipPosition();
