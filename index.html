@@ -286,6 +286,10 @@ Send Sonar Ping
 	</canvas>
 </div>
 
+<p id="depthReadout">
+Estimated Depth: 120 m
+</p>
+
 <p id="pingText"></p>
 </div>
 
@@ -615,7 +619,7 @@ function sendPing(){
 	const targetY =
 		70 + (currentDepth / 300) * 170;
 
-	if(y >= targetY)
+	if(y >= targetY){
             clearInterval(downTrip);
 
             outgoing.style.opacity = 0;
