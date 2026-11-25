@@ -224,6 +224,65 @@ input{
     padding:8px;
     font-size:16px;
 }
+.beamContainer{
+    width:100%;
+    height:220px;
+    position:relative;
+    overflow:hidden;
+}
+
+.singleBeam{
+    animation:pulseBeam 1.5s infinite ease-in-out;
+    transform-origin:50% 0%;
+}
+
+.multiBeam{
+    animation:pulseBeam 1.2s infinite ease-in-out;
+    transform-origin:50% 0%;
+}
+
+.depthDot{
+    animation:flashDot 1.5s infinite;
+}
+
+@keyframes pulseBeam{
+    0%{
+        opacity:.4;
+    }
+    50%{
+        opacity:1;
+    }
+    100%{
+        opacity:.4;
+    }
+}
+
+@keyframes flashDot{
+    0%,100%{
+        r:4;
+        opacity:.5;
+    }
+    50%{
+        r:8;
+        opacity:1;
+    }
+}
+.scanLine{
+    animation:sweep 2s infinite linear;
+}
+
+@keyframes sweep{
+    0%{
+        transform:translateX(-50px);
+    }
+    50%{
+        transform:translateX(50px);
+    }
+    100%{
+        transform:translateX(-50px);
+    }
+}
+
 </style>
 </head>
 
@@ -862,7 +921,101 @@ function getCurrentDepth() {
     ];
 }
 
+function showBeam(type){
 
+    const display =
+        document.getElementById("beamDisplay");
+
+    const expl =
+        document.getElementById("beamExplanation");
+
+    if(type === "single"){
+
+        display.innerHTML = `
+        <div class="beamContainer">
+        <svg viewBox="0 0 600 220" width="100%" height="220">
+
+            <text x="290" y="35" font-size="40">
+                🚢
+            </text>
+
+            <polygon
+                class="singleBeam"
+                points="300,55 270,200 330,200"
+                fill="rgba(0,170,255,.45)">
+            </polygon>
+
+            <line x1="0" y1="200"
+                  x2="600" y2="200"
+                  stroke="#654321"
+                  stroke-width="10"/>
+
+            <circle class="depthDot"
+                    cx="300"
+                    cy="200"
+                    fill="yellow">
+            </circle>
+
+        </svg>
+        </div>
+        `;
+
+        expl.innerHTML =
+        "🔹 Single Beam Sonar sends one sound pulse directly beneath the vessel and measures one depth point at a time.";
+
+    }else{
+
+        display.innerHTML = `
+        <div class="beamContainer">
+        <svg viewBox="0 0 600 220" width="100%" height="220">
+
+            <text x="290" y="35" font-size="40">
+                🚢
+            </text>
+
+            <polygon class="multiBeam"
+                points="300,55 100,200 500,200"
+                fill="rgba(0,255,255,.35)">
+            </polygon>
+
+            <line x1="0" y1="200"
+                  x2="600" y2="200"
+                  stroke="#654321"
+                  stroke-width="10"/>
+
+            <circle class="depthDot"
+                cx="150"
+                cy="200"
+                fill="lime"></circle>
+
+            <circle class="depthDot"
+                cx="225"
+                cy="200"
+                fill="lime"></circle>
+
+            <circle class="depthDot"
+                cx="300"
+                cy="200"
+                fill="lime"></circle>
+
+            <circle class="depthDot"
+                cx="375"
+                cy="200"
+                fill="lime"></circle>
+
+            <circle class="depthDot"
+                cx="450"
+                cy="200"
+                fill="lime"></circle>
+
+        </svg>
+        </div>
+        `;
+
+        expl.innerHTML =
+        "🔹 Multibeam Sonar sends many beams at once, collecting a wide swath of depth measurements and mapping the seafloor much faster.";
+    }
+}
 
 </script>
 
